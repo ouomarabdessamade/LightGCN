@@ -2,7 +2,6 @@ import world
 import utils
 from world import cprint
 import torch
-import numpy as np
 from tensorboardX import SummaryWriter
 import time
 import Procedure
