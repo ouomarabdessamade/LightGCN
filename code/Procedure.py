@@ -53,14 +53,12 @@ def test_one_batch(X):
     sorted_items = X[0].numpy()
     groundTrue = X[1]
     r = utils.getLabel(groundTrue, sorted_items)
-    pre, recall, ndcg = [], [], []
+    recall, ndcg = [], []
     for k in world.topks:
         ret = utils.RecallPrecision_ATk(groundTrue, r, k)
-        pre.append(ret['precision'])
         recall.append(ret['recall'])
         ndcg.append(utils.NDCGatK_r(groundTrue,r,k))
     return {'recall':np.array(recall), 
-            'precision':np.array(pre), 
             'ndcg':np.array(ndcg)}
         
             
@@ -74,8 +72,7 @@ def Test(dataset, Recmodel, epoch, w=None, multicore=0):
     max_K = max(world.topks)
     if multicore == 1:
         pool = multiprocessing.Pool(CORES)
-    results = {'precision': np.zeros(len(world.topks)),
-               'recall': np.zeros(len(world.topks)),
+    results = {'recall': np.zeros(len(world.topks)),
                'ndcg': np.zeros(len(world.topks))}
     with torch.no_grad():
         users = list(testDict.keys())
@@ -126,17 +123,14 @@ def Test(dataset, Recmodel, epoch, w=None, multicore=0):
         scale = float(u_batch_size/len(users))
         for result in pre_results:
             results['recall'] += result['recall']
-            results['precision'] += result['precision']
             results['ndcg'] += result['ndcg']
         results['recall'] /= float(len(users))
-        results['precision'] /= float(len(users))
         results['ndcg'] /= float(len(users))
         # results['auc'] = np.mean(auc_record)
         if world.tensorboard:
             w.add_scalars(f'Test/Recall@{world.topks}',
                           {str(world.topks[i]): results['recall'][i] for i in range(len(world.topks))}, epoch)
-            w.add_scalars(f'Test/Precision@{world.topks}',
-                          {str(world.topks[i]): results['precision'][i] for i in range(len(world.topks))}, epoch)
+            
             w.add_scalars(f'Test/NDCG@{world.topks}',
                           {str(world.topks[i]): results['ndcg'][i] for i in range(len(world.topks))}, epoch)
         if multicore == 1:
