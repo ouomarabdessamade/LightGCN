@@ -2,8 +2,10 @@ import world
 import utils
 from world import cprint
 import torch
+import numpy as np
 from tensorboardX import SummaryWriter
 import time
+from time import time 
 import Procedure
 from os.path import join
 # ==============================
@@ -39,11 +41,19 @@ else:
 try:
     for epoch in range(world.TRAIN_epochs):
         start = time.time()
-        if (epoch) %20 == 0:
+        if epoch %20 == 0:
             cprint("[TEST]")
+            t1 = time()
             Procedure.Test(dataset, Recmodel, epoch, w, world.config['multicore'])
+            perf_str = 'Test time [%.1fs]' % (
+                         time() - t1)
+            print(perf_str)
+        t2 = time()
         output_information = Procedure.BPR_train_original(dataset, Recmodel, bpr, epoch, neg_k=Neg_k,w=w)
-        print(f'EPOCH[{epoch+1}/{world.TRAIN_epochs}] {output_information}')
+        print(f'EPOCH[{epoch}/{world.TRAIN_epochs}] {output_information}')
+        perf_str = 'Train time [%.1fs]' % (
+                     time() - t2)
+        print(perf_str)
         torch.save(Recmodel.state_dict(), weight_file)
 finally:
     if world.tensorboard:
