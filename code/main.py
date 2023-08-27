@@ -5,7 +5,7 @@ import torch
 import numpy as np
 from tensorboardX import SummaryWriter
 import time
-from time import time 
+from time import time as tm
 import Procedure
 from os.path import join
 # ==============================
@@ -43,16 +43,16 @@ try:
         start = time.time()
         if epoch %20 == 0:
             cprint("[TEST]")
-            t1 = time()
+            t1 = tm()
             Procedure.Test(dataset, Recmodel, epoch, w, world.config['multicore'])
             perf_str = 'Test time [%.1fs]' % (
-                         time() - t1)
+                         tm() - t1)
             print(perf_str)
-        t2 = time()
+        t2 = tm()
         output_information = Procedure.BPR_train_original(dataset, Recmodel, bpr, epoch, neg_k=Neg_k,w=w)
         print(f'EPOCH[{epoch}/{world.TRAIN_epochs}] {output_information}')
         perf_str = 'Train time [%.1fs]' % (
-                     time() - t2)
+                     tm() - t2)
         print(perf_str)
         torch.save(Recmodel.state_dict(), weight_file)
 finally:
